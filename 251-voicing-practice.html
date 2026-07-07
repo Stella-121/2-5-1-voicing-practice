@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>2-5-1 Voicing 연습</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 48px 32px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .label {
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #9aa5d1;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .result {
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 1.4;
+    min-height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .form-tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-size: 22px;
+    margin-right: 8px;
+  }
+  .formA { background: #e94560; }
+  .formB { background: #4361ee; }
+  .key {
+    font-size: 48px;
+  }
+  .chords {
+    margin-top: 18px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #f1f1f1;
+    letter-spacing: 1px;
+  }
+  .chords span.arrow {
+    color: #7a85b5;
+    margin: 0 8px;
+    font-weight: 400;
+  }
+  button {
+    margin-top: 32px;
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 16px;
+    background: #e94560;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  button:active { transform: scale(0.96); }
+  .history {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #7a85b5;
+    min-height: 18px;
+    word-break: keep-all;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="label">2-5-1 Voicing Practice</div>
+  <div class="result" id="result">버튼을 눌러 시작</div>
+  <div class="chords" id="chords"></div>
+  <button onclick="draw()">뽑기 🎲</button>
+  <div class="history" id="history"></div>
+</div>
+
+<script>
+  const keys = ["C","D♭","D","E♭","E","F","F♯/G♭","G","A♭","A","B♭","B"];
+  const progressions = {
+    "C":    ["Dm7", "G7", "Cmaj7"],
+    "D♭":   ["E♭m7", "A♭7", "D♭maj7"],
+    "D":    ["Em7", "A7", "Dmaj7"],
+    "E♭":   ["Fm7", "B♭7", "E♭maj7"],
+    "E":    ["F♯m7", "B7", "Emaj7"],
+    "F":    ["Gm7", "C7", "Fmaj7"],
+    "F♯/G♭": ["G♯m7", "C♯7", "F♯maj7"],
+    "G":    ["Am7", "D7", "Gmaj7"],
+    "A♭":   ["B♭m7", "E♭7", "A♭maj7"],
+    "A":    ["Bm7", "E7", "Amaj7"],
+    "B♭":   ["Cm7", "F7", "B♭maj7"],
+    "B":    ["C♯m7", "F♯7", "Bmaj7"]
+  };
+  const forms = ["A", "B"];
+  let last = [];
+
+  function draw() {
+    const form = forms[Math.floor(Math.random() * forms.length)];
+    const key = keys[Math.floor(Math.random() * keys.length)];
+    const formClass = form === "A" ? "formA" : "formB";
+    const [ii, V, I] = progressions[key];
+
+    document.getElementById("result").innerHTML =
+      `<span class="form-tag ${formClass}">${form} form</span><span class="key">${key}</span>`;
+    document.getElementById("chords").innerHTML =
+      `${ii}<span class="arrow">→</span>${V}<span class="arrow">→</span>${I}`;
+
+    last.unshift(`${form}-${key}`);
+    if (last.length > 6) last.pop();
+    document.getElementById("history").textContent =
+      last.length > 1 ? "이전: " + last.slice(1).join(" · ") : "";
+
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+</script>
+
+</body>
+</html>
