@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>2-5-1 Voicing 연습</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #1a1a2e 0%, #16213e 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+  .app-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #9aa5d1;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* ── 헤더 (form + key) ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+  }
+  .form-tag {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .formA { background: #e94560; }
+  .formB { background: #4361ee; }
+  .key-name {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .empty-hint {
+    font-size: 16px;
+    color: #7a85b5;
+  }
+
+  /* ── 코드 카드들 ── */
+  .voicing-area { display: none; }
+  .voicing-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .chord-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+  }
+  .chord-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .chord-name { font-size: 20px; font-weight: 700; }
+  .chord-role {
+    font-size: 12px;
+    color: #9aa5d1;
+    background: rgba(255,255,255,0.08);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .hand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+  .hand-row:last-child { margin-bottom: 0; }
+  .hand-label {
+    font-size: 11px;
+    color: #9aa5d1;
+    width: 26px;
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .notes-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .notes {
+    font-size: 17px;
+    font-weight: 600;
+    color: #f1f1f1;
+    letter-spacing: 0.5px;
+    transition: filter 0.25s;
+  }
+  .interval-tag {
+    font-size: 11px;
+    color: #7a85b5;
+  }
+
+  /* blur 상태 */
+  .blurred .notes { filter: blur(5px); user-select: none; }
+  .blurred .interval-tag { filter: blur(5px); user-select: none; }
+
+  /* ── 버튼들 ── */
+  .reveal-btn {
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    background: transparent;
+    color: #9aa5d1;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .reveal-btn:active { background: rgba(255,255,255,0.08); }
+
+  .draw-btn {
+    margin-top: 18px;
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    background: #e94560;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .draw-btn:active { transform: scale(0.96); }
+
+  .history {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #7a85b5;
+    min-height: 16px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="app-label">2-5-1 Voicing Practice</div>
+
+  <div class="header" id="header">
+    <span class="empty-hint">버튼을 눌러 시작</span>
+  </div>
+
+  <div class="voicing-area" id="voicing-area">
+    <div class="voicing-grid" id="voicing-grid"></div>
+    <button class="reveal-btn" id="reveal-btn" onclick="toggleReveal()">음표 보기 👁</button>
+  </div>
+
+  <button class="draw-btn" onclick="draw()">뽑기 🎲</button>
+  <div class="history" id="history"></div>
+</div>
+
+<script>
+// ── 데이터 ──────────────────────────────────────────────
+
+const KEY_DISPLAY = ["C","D♭","D","E♭","E","F","F♯/G♭","G","A♭","A","B♭","B"];
+const KEY_ID      = ["C","Db","D","Eb","E","F","Fs",     "G","Ab","A","Bb","B"];
+
+// 각 조성의 다이아토닉 음(7개, index 0=I ~ 6=VII)
+const SCALES = {
+  C:  ["C","D","E","F","G","A","B"],
+  Db: ["D♭","E♭","F","G♭","A♭","B♭","C"],
+  D:  ["D","E","F♯","G","A","B","C♯"],
+  Eb: ["E♭","F","G","A♭","B♭","C","D"],
+  E:  ["E","F♯","G♯","A","B","C♯","D♯"],
+  F:  ["F","G","A","B♭","C","D","E"],
+  Fs: ["F♯","G♯","A♯","B","C♯","D♯","E♯"],
+  G:  ["G","A","B","C","D","E","F♯"],
+  Ab: ["A♭","B♭","C","D♭","E♭","F","G"],
+  A:  ["A","B","C♯","D","E","F♯","G♯"],
+  Bb: ["B♭","C","D","E♭","F","G","A"],
+  B:  ["B","C♯","D♯","E","F♯","G♯","A♯"],
+};
+
+// 코드 이름 [ii, V, I]
+const CHORDS = {
+  C:  ["Dm7","G7","Cmaj7"],
+  Db: ["E♭m7","A♭7","D♭maj7"],
+  D:  ["Em7","A7","Dmaj7"],
+  Eb: ["Fm7","B♭7","E♭maj7"],
+  E:  ["F♯m7","B7","Emaj7"],
+  F:  ["Gm7","C7","Fmaj7"],
+  Fs: ["G♯m7","C♯7","F♯maj7"],
+  G:  ["Am7","D7","Gmaj7"],
+  Ab: ["B♭m7","E♭7","A♭maj7"],
+  A:  ["Bm7","E7","Amaj7"],
+  Bb: ["Cm7","F7","B♭maj7"],
+  B:  ["C♯m7","F♯7","Bmaj7"],
+};
+
+// LH: 루트 단음
+// RH: 3도 + 7도만 (shell voicing)
+//   ii (m7):  ♭3=IV[3], ♭7=I[0]
+//   V (dom7): 3=VII[6], ♭7=IV[3]
+//   I (Maj7): 3=III[2],  7=VII[6]
+// A form → ♭7(or 7) 아래, 3 위 / B form → 반전
+
+const FORMULAS = {
+  ii: {
+    LH: 1,
+    A: { RH:[3,0], RH_i:["♭3","♭7"] },
+    B: { RH:[0,3], RH_i:["♭7","♭3"] },
+  },
+  V: {
+    LH: 4,
+    A: { RH:[3,6], RH_i:["♭7","3"] },
+    B: { RH:[6,3], RH_i:["3","♭7"] },
+  },
+  I: {
+    LH: 0,
+    A: { RH:[2,6], RH_i:["3","7"] },
+    B: { RH:[6,2], RH_i:["7","3"] },
+  },
+};
+
+const ROLES = ["ii","V","I"];
+const ROLE_LABELS = ["ii","V","I"];
+
+// ── 상태 ─────────────────────────────────────────────────
+let revealed = false;
+let last = [];
+
+// ── 함수 ─────────────────────────────────────────────────
+function toggleReveal() {
+  revealed = !revealed;
+  document.querySelectorAll('.chord-card').forEach(el => {
+    el.classList.toggle('blurred', !revealed);
+  });
+  document.getElementById('reveal-btn').textContent =
+    revealed ? '음표 숨기기 🙈' : '음표 보기 👁';
+}
+
+function draw() {
+  const idx  = Math.floor(Math.random() * 12);
+  const kid  = KEY_ID[idx];
+  const kd   = KEY_DISPLAY[idx];
+  const form = Math.random() < 0.5 ? "A" : "B";
+  const fc   = form === "A" ? "formA" : "formB";
+  const scale = SCALES[kid];
+  const chords = CHORDS[kid];
+
+  // 헤더
+  document.getElementById("header").innerHTML =
+    `<span class="form-tag ${fc}">${form} form</span><span class="key-name">${kd}</span>`;
+
+  // 카드 생성
+  let html = "";
+  ROLES.forEach((role, i) => {
+    const f       = FORMULAS[role];
+    const lhNote  = scale[f.LH];
+    const rhNotes = f[form].RH.map(n => scale[n]).join("  ·  ");
+    const rhInt   = f[form].RH_i.join("  ·  ");
+
+    html += `
+    <div class="chord-card blurred">
+      <div class="chord-header">
+        <span class="chord-name">${chords[i]}</span>
+        <span class="chord-role">${ROLE_LABELS[i]}</span>
+      </div>
+      <div class="hand-row">
+        <span class="hand-label">LH</span>
+        <div class="notes-wrap">
+          <span class="notes">${lhNote}</span>
+          <span class="interval-tag">root</span>
+        </div>
+      </div>
+      <div class="hand-row">
+        <span class="hand-label">RH</span>
+        <div class="notes-wrap">
+          <span class="notes">${rhNotes}</span>
+          <span class="interval-tag">${rhInt}</span>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById("voicing-grid").innerHTML = html;
+  document.getElementById("voicing-area").style.display = "block";
+
+  revealed = false;
+  document.getElementById("reveal-btn").textContent = "음표 보기 👁";
+
+  last.unshift(`${form}-${kd}`);
+  if (last.length > 6) last.pop();
+  document.getElementById("history").textContent =
+    last.length > 1 ? "이전: " + last.slice(1).join(" · ") : "";
+
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+</script>
+</body>
+</html>
